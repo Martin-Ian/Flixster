@@ -1,18 +1,22 @@
 package com.example.flixster;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
 import android.util.Log;
 
 import com.codepath.asynchttpclient.AsyncHttpClient;
 import com.codepath.asynchttpclient.callback.JsonHttpResponseHandler;
+import com.example.flixster.adapters.MovieAdapter;
 import com.example.flixster.models.Movie;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import okhttp3.Headers;
@@ -28,6 +32,17 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        RecyclerView rvMovies = findViewById(R.id.rvMovies);
+        movies = new ArrayList<>();
+
+        //Create the Adapter
+        final MovieAdapter movieAdapter = new MovieAdapter(this, movies);
+
+        //Set the adapter on the recycler view
+        rvMovies.setAdapter(movieAdapter);
+
+        //Set a layout view.
+        rvMovies.setLayoutManager(new LinearLayoutManager(this));
 
         // Async Internet handler.
         AsyncHttpClient client = new AsyncHttpClient();
@@ -43,7 +58,8 @@ public class MainActivity extends AppCompatActivity {
                     Log.e(TAG, "Results: " + results.toString());
 
                     //Calling our Movie.java class to handle the Parsing logic.
-                    movies = Movie.fromJsonArray(results);
+                    movies.addAll(Movie.fromJsonArray(results));
+                    movieAdapter.notifyDataSetChanged();
                 } catch (JSONException e) {
                     //Key doesn't exist or other issue...
                     Log.e(TAG, "Oops.. JSON had a problem");
